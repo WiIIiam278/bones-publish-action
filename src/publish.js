@@ -1,5 +1,5 @@
 const { createReadStream } = require('fs')
-const { FormData } = require('node-fetch')
+const FormData = require('form-data')
 const fetch = require('node-fetch')
 const core = require('@actions/core')
 const glob = require('@actions/glob')
