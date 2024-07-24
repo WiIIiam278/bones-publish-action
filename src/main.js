@@ -30,7 +30,7 @@ async function run() {
       core.getInput('project'),
       core.getInput('channel'),
       {
-        version: core.getInput('version'),
+        name: core.getInput('version'),
         changelog: core.getInput('changelog'),
         timestamp: Date.now(),
         downloads: getDownloads(),

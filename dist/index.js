@@ -10668,7 +10668,7 @@ async function run() {
       core.getInput('project'),
       core.getInput('channel'),
       {
-        version: core.getInput('version'),
+        name: core.getInput('version'),
         changelog: core.getInput('changelog'),
         timestamp: Date.now(),
         downloads: getDownloads(),
@@ -10735,7 +10735,7 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   }
 
   const data = getFormData(version, files)
-  core.notice(`Publishing ${version.version} with ${files.length} files...`)
+  core.notice(`Publishing ${version.name} with ${files.length} files...`)
   const response = await fetch(
     `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
     {
@@ -10750,7 +10750,7 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   if (!response.ok) {
     throw new Error(`Failed to publish version: ${response.statusText}`)
   }
-  core.notice(`Published version ${version.version}!`)
+  core.notice(`Published version ${version.name}!`)
 }
 
 module.exports = {
