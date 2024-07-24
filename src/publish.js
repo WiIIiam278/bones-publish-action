@@ -39,8 +39,10 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   }
 
   core.notice(`Publishing ${version.version} with ${files.length} files...`)
-  core.notice(JSON.stringify(data))
+
   const data = getFormData(version, files)
+  core.notice(JSON.stringify(data))
+
   const response = await fetch(
     `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
     {
