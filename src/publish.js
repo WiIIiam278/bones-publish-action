@@ -12,6 +12,7 @@ const getFormData = (version, files) => {
   for (const file of files) {
     form.append('files', createReadStream(file))
   }
+  core.notice(`Form data: ${form.values()}, ${form.entries()}`)
   return form
 }
 
