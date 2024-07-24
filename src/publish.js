@@ -1,4 +1,3 @@
-const FormData = require('form-data')
 const { createReadStream } = require('fs')
 const fetch = require('node-fetch')
 const core = require('@actions/core')
