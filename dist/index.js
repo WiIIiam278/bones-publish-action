@@ -9227,7 +9227,10 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
     `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
     {
       method: 'POST',
-      headers: { 'X-Api-Key': apiKey },
+      headers: {
+        'X-Api-Key': apiKey,
+        'Content-Type': 'multipart/mixed'
+      },
       body: getFormData(version, files)
     }
   )
