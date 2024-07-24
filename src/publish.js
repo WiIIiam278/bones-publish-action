@@ -10,8 +10,8 @@ const getFormData = (version, files) => {
     new Blob([JSON.stringify(version)], { type: 'application/json' })
   )
   for (const file of files) {
-    form.append('files', file)
-    console.log(file)
+    form.append('files', new Blob([readFileSync(file)]), file.split('/').pop())
+    console
   }
   return form
 }
@@ -22,9 +22,7 @@ const getFileForGlob = async fileGlob => {
   if (files.length === 0) {
     throw new Error(`No files found for glob: ${fileGlob}`)
   }
-  const read = new File([readFileSync(files[0])], files[0].split('/').pop())
-  core.notice(`Found file: ${read.name}`)
-  return read
+  return files[0]
 }
 
 const getAllFilesForGlobs = async fileGlobs => {
