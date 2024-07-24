@@ -9932,6 +9932,125 @@ exports["default"] = _default;
 
 /***/ }),
 
+/***/ 1713:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const { publish } = __nccwpck_require__(878)
+const core = __nccwpck_require__(2186)
+
+const getDownloads = () => {
+  const downloads = []
+  const distroNames = core.getInput('distro-names').trim().split('\n')
+  const distroGroups = core.getInput('distro-groups').trim().split('\n')
+  const distroDescs = core.getInput('distro-descriptions').trim().split('\n')
+  for (let i = 0; i < distroNames.length; i++) {
+    downloads.push({
+      distribution: {
+        name: distroNames[i].trim(),
+        groupName: distroGroups[i].trim(),
+        description: distroDescs[i].trim(),
+        archived: false
+      },
+      name: '',
+      md5: '',
+      fileSize: 0
+    })
+  }
+  return downloads
+}
+
+async function run() {
+  try {
+    await publish(
+      core.getInput('api-url'),
+      core.getInput('api-key'),
+      core.getInput('project'),
+      core.getInput('channel'),
+      {
+        version: core.getInput('version'),
+        changelog: core.getInput('changelog'),
+        timestamp: Date.now(),
+        downloads: getDownloads(),
+        downloadCount: 0
+      },
+      core.getInput('files').trim().split('\n')
+    )
+  } catch (error) {
+    core.setFailed(error.message)
+  }
+}
+
+module.exports = {
+  run
+}
+
+
+/***/ }),
+
+/***/ 878:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const fetch = __nccwpck_require__(4429)
+const core = __nccwpck_require__(2186)
+const glob = __nccwpck_require__(8090)
+
+const getFormData = (version, files) => {
+  const form = new FormData()
+  form.append(
+    'version',
+    new Blob([JSON.stringify(version)], { type: 'application/json' })
+  )
+  for (const file of files) {
+    form.append('files', file)
+  }
+  return form
+}
+
+const getFileForGlob = async fileGlob => {
+  const globber = await glob.create(fileGlob.trim())
+  const files = await globber.glob()
+  if (files.length === 0) {
+    throw new Error(`No files found for glob: ${fileGlob}`)
+  }
+  return files[0]
+}
+
+const getAllFilesForGlobs = async fileGlobs => {
+  const files = []
+  for (const fileGlob of fileGlobs) {
+    files.push(await getFileForGlob(fileGlob))
+  }
+  return files
+}
+
+async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
+  const files = await getAllFilesForGlobs(fileGlobs)
+  for (let i = 0; i < files.length; i++) {
+    version.downloads[i].name = files[i].name
+  }
+
+  const response = await fetch(
+    `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
+    {
+      method: 'POST',
+      headers: { 'X-Api-Key': apiKey },
+      body: getFormData(version, files)
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error(`Failed to publish version: ${response.statusText}`)
+  }
+  core.info(`Published version ${version.version}`)
+}
+
+module.exports = {
+  publish
+}
+
+
+/***/ }),
+
 /***/ 9491:
 /***/ ((module) => {
 
@@ -10187,10 +10306,15 @@ const File = _File
 
 // EXPORTS
 __nccwpck_require__.d(__webpack_exports__, {
-  "$B": () => (/* reexport */ file/* default */.Z)
+  "t6": () => (/* reexport */ fetch_blob/* default */.Z),
+  "$B": () => (/* reexport */ file/* default */.Z),
+  "xB": () => (/* binding */ blobFrom),
+  "SX": () => (/* binding */ blobFromSync),
+  "e2": () => (/* binding */ fileFrom),
+  "RA": () => (/* binding */ fileFromSync)
 });
 
-// UNUSED EXPORTS: Blob, blobFrom, blobFromSync, default, fileFrom, fileFromSync
+// UNUSED EXPORTS: default
 
 ;// CONCATENATED MODULE: external "node:fs"
 const external_node_fs_namespaceObject = require("node:fs");
@@ -10216,7 +10340,7 @@ const { stat } = external_node_fs_namespaceObject.promises
  * @param {string} path filepath on the disk
  * @param {string} [type] mimetype to use
  */
-const blobFromSync = (path, type) => fromBlob(statSync(path), path, type)
+const blobFromSync = (path, type) => fromBlob((0,external_node_fs_namespaceObject.statSync)(path), path, type)
 
 /**
  * @param {string} path filepath on the disk
@@ -10236,10 +10360,10 @@ const fileFrom = (path, type) => stat(path).then(stat => fromFile(stat, path, ty
  * @param {string} path filepath on the disk
  * @param {string} [type] mimetype to use
  */
-const fileFromSync = (path, type) => fromFile(statSync(path), path, type)
+const fileFromSync = (path, type) => fromFile((0,external_node_fs_namespaceObject.statSync)(path), path, type)
 
 // @ts-ignore
-const fromBlob = (stat, path, type = '') => new Blob([new BlobDataItem({
+const fromBlob = (stat, path, type = '') => new fetch_blob/* default */.Z([new BlobDataItem({
   path,
   size: stat.size,
   lastModified: stat.mtimeMs,
@@ -10247,12 +10371,12 @@ const fromBlob = (stat, path, type = '') => new Blob([new BlobDataItem({
 })], { type })
 
 // @ts-ignore
-const fromFile = (stat, path, type = '') => new File([new BlobDataItem({
+const fromFile = (stat, path, type = '') => new file/* default */.Z([new BlobDataItem({
   path,
   size: stat.size,
   lastModified: stat.mtimeMs,
   start: 0
-})], basename(path), { type, lastModified: stat.mtimeMs })
+})], (0,external_node_path_namespaceObject.basename)(path), { type, lastModified: stat.mtimeMs })
 
 /**
  * This is a blob backed up by a file on the disk
@@ -10288,9 +10412,9 @@ class BlobDataItem {
   async * stream () {
     const { mtimeMs } = await stat(this.#path)
     if (mtimeMs > this.lastModified) {
-      throw new DOMException('The requested file could not be read, typically due to permission problems that have occurred after a reference to a file was acquired.', 'NotReadableError')
+      throw new node_domexception('The requested file could not be read, typically due to permission problems that have occurred after a reference to a file was acquired.', 'NotReadableError')
     }
-    yield * createReadStream(this.#path, {
+    yield * (0,external_node_fs_namespaceObject.createReadStream)(this.#path, {
       start: this.#start,
       end: this.#start + this.size - 1
     })
@@ -10623,155 +10747,32 @@ c.push(`--${b}--`)
 return new B(c,{type:"multipart/form-data; boundary="+b})}
 
 
-/***/ })
+/***/ }),
 
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __nccwpck_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		var threw = true;
-/******/ 		try {
-/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
-/******/ 			threw = false;
-/******/ 		} finally {
-/******/ 			if(threw) delete __webpack_module_cache__[moduleId];
-/******/ 		}
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__nccwpck_require__.m = __webpack_modules__;
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__nccwpck_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/ensure chunk */
-/******/ 	(() => {
-/******/ 		__nccwpck_require__.f = {};
-/******/ 		// This file contains only the entry chunk.
-/******/ 		// The chunk loading function for additional chunks
-/******/ 		__nccwpck_require__.e = (chunkId) => {
-/******/ 			return Promise.all(Object.keys(__nccwpck_require__.f).reduce((promises, key) => {
-/******/ 				__nccwpck_require__.f[key](chunkId, promises);
-/******/ 				return promises;
-/******/ 			}, []));
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/get javascript chunk filename */
-/******/ 	(() => {
-/******/ 		// This function allow to reference async chunks
-/******/ 		__nccwpck_require__.u = (chunkId) => {
-/******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + ".index.js";
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/compat */
-/******/ 	
-/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
-/******/ 	
-/******/ 	/* webpack/runtime/require chunk loading */
-/******/ 	(() => {
-/******/ 		// no baseURI
-/******/ 		
-/******/ 		// object to store loaded chunks
-/******/ 		// "1" means "loaded", otherwise not loaded yet
-/******/ 		var installedChunks = {
-/******/ 			179: 1
-/******/ 		};
-/******/ 		
-/******/ 		// no on chunks loaded
-/******/ 		
-/******/ 		var installChunk = (chunk) => {
-/******/ 			var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;
-/******/ 			for(var moduleId in moreModules) {
-/******/ 				if(__nccwpck_require__.o(moreModules, moduleId)) {
-/******/ 					__nccwpck_require__.m[moduleId] = moreModules[moduleId];
-/******/ 				}
-/******/ 			}
-/******/ 			if(runtime) runtime(__nccwpck_require__);
-/******/ 			for(var i = 0; i < chunkIds.length; i++)
-/******/ 				installedChunks[chunkIds[i]] = 1;
-/******/ 		
-/******/ 		};
-/******/ 		
-/******/ 		// require() chunk loading for javascript
-/******/ 		__nccwpck_require__.f.require = (chunkId, promises) => {
-/******/ 			// "1" is the signal for "already loaded"
-/******/ 			if(!installedChunks[chunkId]) {
-/******/ 				if(true) { // all chunks have JS
-/******/ 					installChunk(require("./" + __nccwpck_require__.u(chunkId)));
-/******/ 				} else installedChunks[chunkId] = 1;
-/******/ 			}
-/******/ 		};
-/******/ 		
-/******/ 		// no external install chunk
-/******/ 		
-/******/ 		// no HMR
-/******/ 		
-/******/ 		// no HMR manifest
-/******/ 	})();
-/******/ 	
-/************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
+/***/ 4429:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
 "use strict";
 // ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
 
-// NAMESPACE OBJECT: ./src/publish.js
-var publish_namespaceObject = {};
-__nccwpck_require__.r(publish_namespaceObject);
-
-// NAMESPACE OBJECT: ./src/main.js
-var main_namespaceObject = {};
-__nccwpck_require__.r(main_namespaceObject);
+// EXPORTS
+__nccwpck_require__.d(__webpack_exports__, {
+  "AbortError": () => (/* reexport */ AbortError),
+  "Blob": () => (/* reexport */ from/* Blob */.t6),
+  "FetchError": () => (/* reexport */ FetchError),
+  "File": () => (/* reexport */ from/* File */.$B),
+  "FormData": () => (/* reexport */ esm_min/* FormData */.Ct),
+  "Headers": () => (/* reexport */ Headers),
+  "Request": () => (/* reexport */ Request),
+  "Response": () => (/* reexport */ Response),
+  "blobFrom": () => (/* reexport */ from/* blobFrom */.xB),
+  "blobFromSync": () => (/* reexport */ from/* blobFromSync */.SX),
+  "default": () => (/* binding */ fetch),
+  "fileFrom": () => (/* reexport */ from/* fileFrom */.e2),
+  "fileFromSync": () => (/* reexport */ from/* fileFromSync */.RA),
+  "isRedirect": () => (/* reexport */ isRedirect)
+});
 
 ;// CONCATENATED MODULE: external "node:http"
 const external_node_http_namespaceObject = require("node:http");
@@ -12918,123 +12919,148 @@ function fixResponseChunkedTransferBadEnding(request, errorCallback) {
 	});
 }
 
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
-// EXTERNAL MODULE: ./node_modules/@actions/glob/lib/glob.js
-var glob = __nccwpck_require__(8090);
-;// CONCATENATED MODULE: ./src/publish.js
 
+/***/ })
 
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __nccwpck_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		var threw = true;
+/******/ 		try {
+/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
+/******/ 			threw = false;
+/******/ 		} finally {
+/******/ 			if(threw) delete __webpack_module_cache__[moduleId];
+/******/ 		}
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__nccwpck_require__.m = __webpack_modules__;
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/ensure chunk */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.f = {};
+/******/ 		// This file contains only the entry chunk.
+/******/ 		// The chunk loading function for additional chunks
+/******/ 		__nccwpck_require__.e = (chunkId) => {
+/******/ 			return Promise.all(Object.keys(__nccwpck_require__.f).reduce((promises, key) => {
+/******/ 				__nccwpck_require__.f[key](chunkId, promises);
+/******/ 				return promises;
+/******/ 			}, []));
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/get javascript chunk filename */
+/******/ 	(() => {
+/******/ 		// This function allow to reference async chunks
+/******/ 		__nccwpck_require__.u = (chunkId) => {
+/******/ 			// return url for filenames based on template
+/******/ 			return "" + chunkId + ".index.js";
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/compat */
+/******/ 	
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
+/******/ 	
+/******/ 	/* webpack/runtime/require chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded chunks
+/******/ 		// "1" means "loaded", otherwise not loaded yet
+/******/ 		var installedChunks = {
+/******/ 			179: 1
+/******/ 		};
+/******/ 		
+/******/ 		// no on chunks loaded
+/******/ 		
+/******/ 		var installChunk = (chunk) => {
+/******/ 			var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;
+/******/ 			for(var moduleId in moreModules) {
+/******/ 				if(__nccwpck_require__.o(moreModules, moduleId)) {
+/******/ 					__nccwpck_require__.m[moduleId] = moreModules[moduleId];
+/******/ 				}
+/******/ 			}
+/******/ 			if(runtime) runtime(__nccwpck_require__);
+/******/ 			for(var i = 0; i < chunkIds.length; i++)
+/******/ 				installedChunks[chunkIds[i]] = 1;
+/******/ 		
+/******/ 		};
+/******/ 		
+/******/ 		// require() chunk loading for javascript
+/******/ 		__nccwpck_require__.f.require = (chunkId, promises) => {
+/******/ 			// "1" is the signal for "already loaded"
+/******/ 			if(!installedChunks[chunkId]) {
+/******/ 				if(true) { // all chunks have JS
+/******/ 					installChunk(require("./" + __nccwpck_require__.u(chunkId)));
+/******/ 				} else installedChunks[chunkId] = 1;
+/******/ 			}
+/******/ 		};
+/******/ 		
+/******/ 		// no external install chunk
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+const { run } = __nccwpck_require__(1713)
 
-
-const getFormData = (version, files) => {
-  const form = new FormData()
-  form.append(
-    'version',
-    new Blob([JSON.stringify(version)], { type: 'application/json' })
-  )
-  for (const file of files) {
-    form.append('files', file)
-  }
-  return form
-}
-
-const getFileForGlob = async fileGlob => {
-  const globber = await (0,glob.create)(fileGlob.trim())
-  const files = await globber.glob()
-  if (files.length === 0) {
-    throw new Error(`No files found for glob: ${fileGlob}`)
-  }
-  return files[0]
-}
-
-const getAllFilesForGlobs = async fileGlobs => {
-  const files = []
-  for (const fileGlob of fileGlobs) {
-    files.push(await getFileForGlob(fileGlob))
-  }
-  return files
-}
-
-async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
-  const files = await getAllFilesForGlobs(fileGlobs)
-  for (let i = 0; i < files.length; i++) {
-    version.downloads[i].name = files[i].name
-  }
-
-  const response = await fetch(
-    `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
-    {
-      method: 'POST',
-      headers: { 'X-Api-Key': apiKey },
-      body: getFormData(version, files)
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(`Failed to publish version: ${response.statusText}`)
-  }
-  (0,core.info)(`Published version ${version.version}`)
-}
-
-/* harmony default export */ const src_publish = ({
-  publish
-});
-
-;// CONCATENATED MODULE: ./src/main.js
-
-
-
-const getDownloads = () => {
-  const downloads = []
-  const distroNames = (0,core.getInput)('distro-names').trim().split('\n')
-  const distroGroups = (0,core.getInput)('distro-groups').trim().split('\n')
-  const distroDescs = (0,core.getInput)('distro-descriptions').trim().split('\n')
-  for (let i = 0; i < distroNames.length; i++) {
-    downloads.push({
-      distribution: {
-        name: distroNames[i].trim(),
-        groupName: distroGroups[i].trim(),
-        description: distroDescs[i].trim(),
-        archived: false
-      },
-      name: '',
-      md5: '',
-      fileSize: 0
-    })
-  }
-  return downloads
-}
-
-async function run() {
-  try {
-    await (0,publish_namespaceObject.publish)(
-      (0,core.getInput)('api-url'),
-      (0,core.getInput)('api-key'),
-      (0,core.getInput)('project'),
-      (0,core.getInput)('channel'),
-      {
-        version: (0,core.getInput)('version'),
-        changelog: (0,core.getInput)('changelog'),
-        timestamp: Date.now(),
-        downloads: getDownloads(),
-        downloadCount: 0
-      },
-      (0,core.getInput)('files').trim().split('\n')
-    )
-  } catch (error) {
-    (0,core.setFailed)(error.message)
-  }
-}
-
-/* harmony default export */ const main = ({
-  run
-});
-
-;// CONCATENATED MODULE: ./src/index.js
-
-
-(0,main_namespaceObject.run)()
+run()
 
 })();
 
