@@ -1,11 +1,11 @@
-const publish = require('./publish')
-const core = require('@actions/core')
+import { publish } from './publish'
+import { getInput, setFailed } from '@actions/core'
 
 const getDownloads = () => {
   const downloads = []
-  const distroNames = core.getInput('distro-names').trim().split('\n')
-  const distroGroups = core.getInput('distro-groups').trim().split('\n')
-  const distroDescs = core.getInput('distro-descriptions').trim().split('\n')
+  const distroNames = getInput('distro-names').trim().split('\n')
+  const distroGroups = getInput('distro-groups').trim().split('\n')
+  const distroDescs = getInput('distro-descriptions').trim().split('\n')
   for (let i = 0; i < distroNames.length; i++) {
     downloads.push({
       distribution: {
@@ -25,24 +25,24 @@ const getDownloads = () => {
 async function run() {
   try {
     await publish(
-      core.getInput('api-url'),
-      core.getInput('api-key'),
-      core.getInput('project'),
-      core.getInput('channel'),
+      getInput('api-url'),
+      getInput('api-key'),
+      getInput('project'),
+      getInput('channel'),
       {
-        version: core.getInput('version'),
-        changelog: core.getInput('changelog'),
+        version: getInput('version'),
+        changelog: getInput('changelog'),
         timestamp: Date.now(),
         downloads: getDownloads(),
         downloadCount: 0
       },
-      core.getInput('files').trim().split('\n')
+      getInput('files').trim().split('\n')
     )
   } catch (error) {
-    core.setFailed(error.message)
+    setFailed(error.message)
   }
 }
 
-module.exports = {
+export default {
   run
 }

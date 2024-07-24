@@ -1,6 +1,6 @@
-const fetch = require('node-fetch')
-const core = require('@actions/core')
-const glob = require('@actions/glob')
+import fetch from 'node-fetch'
+import { info } from '@actions/core'
+import { create } from '@actions/glob'
 
 const getFormData = (version, files) => {
   const form = new FormData()
@@ -15,7 +15,7 @@ const getFormData = (version, files) => {
 }
 
 const getFileForGlob = async fileGlob => {
-  const globber = await glob.create(fileGlob.trim())
+  const globber = await create(fileGlob.trim())
   const files = await globber.glob()
   if (files.length === 0) {
     throw new Error(`No files found for glob: ${fileGlob}`)
@@ -31,14 +31,7 @@ const getAllFilesForGlobs = async fileGlobs => {
   return files
 }
 
-export default async function publish(
-  apiUrl,
-  apiKey,
-  project,
-  channel,
-  version,
-  fileGlobs
-) {
+async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   const files = await getAllFilesForGlobs(fileGlobs)
   for (let i = 0; i < files.length; i++) {
     version.downloads[i].name = files[i].name
@@ -56,5 +49,9 @@ export default async function publish(
   if (!response.ok) {
     throw new Error(`Failed to publish version: ${response.statusText}`)
   }
-  core.info(`Published version ${version.version}`)
+  info(`Published version ${version.version}`)
+}
+
+export default {
+  publish
 }
