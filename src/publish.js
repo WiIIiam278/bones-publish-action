@@ -20,6 +20,7 @@ const getFileForGlob = async fileGlob => {
   if (files.length === 0) {
     throw new Error(`No files found for glob: ${fileGlob}`)
   }
+  core.info(`Found file for glob ${fileGlob}: ${files[0]}`)
   return files[0]
 }
 
