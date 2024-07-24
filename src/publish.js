@@ -10,7 +10,7 @@ const getFormData = (version, files) => {
     new Blob([JSON.stringify(version)], { type: 'application/json' })
   )
   for (const file of files) {
-    form.append('files', file)
+    form.append('files', new Blob([file], { type: 'application/octet-stream' }))
   }
   return form
 }
