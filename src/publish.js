@@ -1,4 +1,5 @@
-const { readFileSync } = require('fs')
+const FormData = require('form-data');     
+const { createReadStream } = require('fs')
 const fetch = require('node-fetch')
 const core = require('@actions/core')
 const glob = require('@actions/glob')
@@ -10,8 +11,7 @@ const getFormData = (version, files) => {
     new Blob([JSON.stringify(version)], { type: 'application/json' })
   )
   for (const file of files) {
-    form.append('files', new Blob([readFileSync(file)]), file.split('/').pop())
-    console
+    form.append('files', createReadStream(file))
   }
   return form
 }
@@ -36,7 +36,7 @@ const getAllFilesForGlobs = async fileGlobs => {
 async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   const files = await getAllFilesForGlobs(fileGlobs)
   for (let i = 0; i < files.length; i++) {
-    version.downloads[i].name = files[i].name
+    version.downloads[i].name = files[i].split('/').pop()
   }
 
   core.notice(`Publishing ${version.version} with ${files.length} files...`)
@@ -45,8 +45,7 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
     {
       method: 'POST',
       headers: {
-        'X-Api-Key': apiKey,
-        'Content-Type': 'multipart/mixed'
+        'X-Api-Key': apiKey
       },
       body: getFormData(version, files)
     }
