@@ -57,7 +57,19 @@ jobs:
         id: test-action
         uses: ./
         with:
-          milliseconds: 1000
+          api-key: ${{ secrets.BONES_API_KEY }}
+          project: 'test-project'
+          channel: 'release'
+          version: '1.0'
+          changelog: 'Test release v1.0'
+          distro-names: |
+            fabric-1.20.1
+          distro-groups: |
+            fabric
+          distro-descriptions: |
+            fabric-1.21
+          files: |
+            dist/*
 
       - name: Print Output
         id: output
