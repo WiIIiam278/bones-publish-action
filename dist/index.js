@@ -10670,7 +10670,7 @@ async function run() {
       {
         name: core.getInput('version'),
         changelog: core.getInput('changelog'),
-        timestamp: Date.now(),
+        timestamp: new Date(),
         downloads: getDownloads(),
         downloadCount: 0
       },
