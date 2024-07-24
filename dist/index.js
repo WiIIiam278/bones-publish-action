@@ -10691,7 +10691,7 @@ module.exports = {
 /***/ 878:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { createReadStream } = __nccwpck_require__(7147)
+const { readFileSync } = __nccwpck_require__(7147)
 const FormData = __nccwpck_require__(4334)
 const fetch = __nccwpck_require__(467)
 const core = __nccwpck_require__(2186)
@@ -10704,7 +10704,10 @@ const getFormData = (version, files) => {
     new Blob([JSON.stringify(version)], { type: 'application/json' })
   )
   for (const file of files) {
-    form.append('files', createReadStream(file))
+    form.append(
+      'files',
+      await(new File([readFileSync(file)], file.split('/').pop()).arrayBuffer())
+    )
   }
   return form
 }

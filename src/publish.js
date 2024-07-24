@@ -1,4 +1,4 @@
-const { createReadStream } = require('fs')
+const { readFileSync } = require('fs')
 const FormData = require('form-data')
 const fetch = require('node-fetch')
 const core = require('@actions/core')
@@ -11,7 +11,10 @@ const getFormData = (version, files) => {
     new Blob([JSON.stringify(version)], { type: 'application/json' })
   )
   for (const file of files) {
-    form.append('files', createReadStream(file))
+    form.append(
+      'files',
+      await(new File([readFileSync(file)], file.split('/').pop()).arrayBuffer())
+    )
   }
   return form
 }
