@@ -3,10 +3,37 @@ description: 'Publish build artifacts as release on Bones'
 author: 'William278 <will27528@gmail.com>'
 
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  api-url:
+    description: 'API URL for the bones service'
     required: true
-    default: '1000'
+    default: 'https://api.william278.net'
+  api-key:
+    description: 'API key for the bones service'
+    required: true
+  project:
+    description: 'Project slug to publish the release to'
+    required: true
+  channel:
+    description: 'Channel name for the release'
+    required: true
+  version:
+    description: 'Version name for the release'
+    required: true
+  changelog:
+    description: 'Changelog for the release'
+    required: true
+  distro-names:
+    description: 'Distribution names for the release (ordered)'
+    required: true
+  distro-groups:
+    description: 'Distribution groups for the release (ordered)'
+    required: true
+  distro-descriptions:
+    description: 'Distribution descriptions for the release (ordered)'
+    required: true
+  files:
+    description: 'Globs for distribution files for the release (ordered)'
+    required: true
 
 runs:
   using: node20
