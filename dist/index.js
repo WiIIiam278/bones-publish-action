@@ -9181,6 +9181,7 @@ module.exports = {
 /***/ 878:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+const FormData = __nccwpck_require__(3186)
 const { createReadStream } = __nccwpck_require__(7147)
 const fetch = __nccwpck_require__(467)
 const core = __nccwpck_require__(2186)
@@ -9251,6 +9252,14 @@ module.exports = {
 /***/ ((module) => {
 
 module.exports = eval("require")("encoding");
+
+
+/***/ }),
+
+/***/ 3186:
+/***/ ((module) => {
+
+module.exports = eval("require")("form-data");
 
 
 /***/ }),
