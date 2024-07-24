@@ -1,12 +1,6 @@
 name: CI
 
-on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+on: {}
 
 permissions:
   contents: read
@@ -38,7 +32,3 @@ jobs:
             fabric-1.21
           files: |
             dist/*
-
-      - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
