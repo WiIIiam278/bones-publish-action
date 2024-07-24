@@ -8,9 +8,9 @@ const getFormData = (version, files) => {
     'version',
     new Blob([JSON.stringify(version)], { type: 'application/json' })
   )
-  files.value.forEach(file => {
+  for (const file of files) {
     form.append('files', file)
-  })
+  }
   return form
 }
 

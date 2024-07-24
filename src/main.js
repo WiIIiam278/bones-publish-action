@@ -1,5 +1,5 @@
+const publish = require('./publish')
 const core = require('@actions/core')
-const github = require('@actions/github')
 
 const getDownloads = () => {
   const downloads = []
