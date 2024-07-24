@@ -20,7 +20,7 @@ const getFileForGlob = async fileGlob => {
   if (files.length === 0) {
     throw new Error(`No files found for glob: ${fileGlob}`)
   }
-  core.info(`Found file for glob ${fileGlob}: ${files[0]}`)
+  core.notice(`Found file for glob ${fileGlob}: ${files[0]}`)
   return files[0]
 }
 
@@ -37,6 +37,9 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   for (let i = 0; i < files.length; i++) {
     version.downloads[i].name = files[i].name
   }
+  core.notice(
+    `Publishing version ${version.version} with ${files.length} files...`
+  )
 
   const response = await fetch(
     `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
@@ -50,7 +53,7 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   if (!response.ok) {
     throw new Error(`Failed to publish version: ${response.statusText}`)
   }
-  core.info(`Published version ${version.version}`)
+  core.notice(`Published version ${version.version}!`)
 }
 
 module.exports = {
