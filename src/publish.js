@@ -45,8 +45,7 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
     {
       method: 'POST',
       headers: {
-        'X-Api-Key': apiKey,
-        ...data.getHeaders()
+        'X-Api-Key': apiKey
       },
       body: data
     }
