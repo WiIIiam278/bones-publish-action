@@ -21,9 +21,9 @@ const getFileForGlob = async fileGlob => {
   if (files.length === 0) {
     throw new Error(`No files found for glob: ${fileGlob}`)
   }
-  core.notice(`Found file for glob ${fileGlob}: ${files[0]}`)
-
-  return readFileSync(files[0])
+  const read = new File([readFileSync(files[0])], files[0].split('/').pop())
+  core.notice(`Found file: ${read.name}`)
+  return read
 }
 
 const getAllFilesForGlobs = async fileGlobs => {
