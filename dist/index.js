@@ -9181,7 +9181,7 @@ module.exports = {
 /***/ 878:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { readFile } = (__nccwpck_require__(7147).promises)
+const { readFileSync } = __nccwpck_require__(7147)
 const fetch = __nccwpck_require__(467)
 const core = __nccwpck_require__(2186)
 const glob = __nccwpck_require__(8090)
@@ -9206,7 +9206,7 @@ const getFileForGlob = async fileGlob => {
   }
   core.notice(`Found file for glob ${fileGlob}: ${files[0]}`)
 
-  return await readFile(files[0])
+  return readFileSync(files[0])
 }
 
 const getAllFilesForGlobs = async fileGlobs => {

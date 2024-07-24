@@ -1,4 +1,4 @@
-const { readFile } = require('fs').promises
+const { readFileSync } = require('fs')
 const fetch = require('node-fetch')
 const core = require('@actions/core')
 const glob = require('@actions/glob')
@@ -23,7 +23,7 @@ const getFileForGlob = async fileGlob => {
   }
   core.notice(`Found file for glob ${fileGlob}: ${files[0]}`)
 
-  return await readFile(files[0])
+  return readFileSync(files[0])
 }
 
 const getAllFilesForGlobs = async fileGlobs => {
