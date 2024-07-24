@@ -10699,15 +10699,14 @@ const glob = __nccwpck_require__(8090)
 
 const getFormData = (version, files) => {
   const form = new FormData()
-  form.append(
-    'version',
-    new Blob([JSON.stringify(version)], { type: 'application/json' })
-  )
+  form.append('version', JSON.stringify(version), {
+    contentType: 'application/json'
+  })
   for (const file of files) {
-    form.append(
-      'files',
-      await(new File([readFileSync(file)], file.split('/').pop()).arrayBuffer())
-    )
+    form.append('files', readFileSync(file), {
+      contentType: 'application/octet-stream',
+      filename: file.split('/').pop()
+    })
   }
   return form
 }
