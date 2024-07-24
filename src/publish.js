@@ -31,7 +31,7 @@ const getAllFilesForGlobs = async fileGlobs => {
   return files
 }
 
-async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
+export default async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   const files = await getAllFilesForGlobs(fileGlobs)
   for (let i = 0; i < files.length; i++) {
     version.downloads[i].name = files[i].name
@@ -51,5 +51,3 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   }
   core.info(`Published version ${version.version}`)
 }
-
-module.exports = { publish }
