@@ -1,0 +1,13 @@
+name: 'Bones Publish Action'
+description: 'Publish build artifacts as release on Bones'
+author: 'William278 <will27528@gmail.com>'
+
+inputs:
+  milliseconds:
+    description: 'Your input description here'
+    required: true
+    default: '1000'
+
+runs:
+  using: node20
+  main: dist/index.js
