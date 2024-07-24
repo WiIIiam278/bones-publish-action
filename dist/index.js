@@ -9988,8 +9988,13 @@ module.exports = {
 /***/ }),
 
 /***/ 878:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ publish)
+/* harmony export */ });
 const fetch = __nccwpck_require__(4429)
 const core = __nccwpck_require__(2186)
 const glob = __nccwpck_require__(8090)
@@ -10023,7 +10028,14 @@ const getAllFilesForGlobs = async fileGlobs => {
   return files
 }
 
-async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
+async function publish(
+  apiUrl,
+  apiKey,
+  project,
+  channel,
+  version,
+  fileGlobs
+) {
   const files = await getAllFilesForGlobs(fileGlobs)
   for (let i = 0; i < files.length; i++) {
     version.downloads[i].name = files[i].name
@@ -10043,8 +10055,6 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   }
   core.info(`Published version ${version.version}`)
 }
-
-module.exports = { publish }
 
 
 /***/ }),
