@@ -12,9 +12,6 @@ const getFormData = (version, files) => {
   for (const file of files) {
     form.append('files', createReadStream(file))
   }
-  for (const formEntry of form.entries()) {
-    core.notice(formEntry)
-  }
   return form
 }
 
@@ -42,17 +39,15 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   }
 
   core.notice(`Publishing ${version.version} with ${files.length} files...`)
-
-  const data = getFormData(version, files)
   const response = await fetch(
     `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
     {
       method: 'POST',
       headers: {
         'X-Api-Key': apiKey,
-        'Content-Type': `multipart/mixed; boundary=${data._boundary}`
+        'Content-Type': 'multipart/form-data; boundary=----'
       },
-      body: data
+      body: getFormData(version, files)
     }
   )
 
