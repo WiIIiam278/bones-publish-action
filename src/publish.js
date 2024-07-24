@@ -38,6 +38,7 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
     version.downloads[i].name = files[i].split('/').pop()
   }
 
+  const data = getFormData(version, files)
   core.notice(`Publishing ${version.version} with ${files.length} files...`)
   const response = await fetch(
     `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
@@ -45,9 +46,9 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
       method: 'POST',
       headers: {
         'X-Api-Key': apiKey,
-        'Content-Type': 'multipart/form-data; boundary=----'
+        ...data.getHeaders()
       },
-      body: getFormData(version, files)
+      body: data
     }
   )
 
