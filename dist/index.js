@@ -9193,7 +9193,7 @@ const getFormData = (version, files) => {
     new Blob([JSON.stringify(version)], { type: 'application/json' })
   )
   for (const file of files) {
-    form.append('files', new Blob([file], { type: 'application/octet-stream' }))
+    form.append('files', file)
   }
   return form
 }
@@ -9222,16 +9222,18 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   for (let i = 0; i < files.length; i++) {
     version.downloads[i].name = files[i].name
   }
-  core.notice(
-    `Publishing version ${version.version} with ${files.length} files...`
-  )
+  core.notice(`Found ${files.length} files`)
 
+  const form = getFormData(version, files)
+  core.notice(`Form data: ${form}`)
+
+  core.notice(`Publishing ${version.version} with ${files.length} files...`)
   const response = await fetch(
     `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
     {
       method: 'POST',
       headers: { 'X-Api-Key': apiKey },
-      body: getFormData(version, files)
+      body: form
     }
   )
 
