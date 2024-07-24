@@ -39,14 +39,17 @@ async function publish(apiUrl, apiKey, project, channel, version, fileGlobs) {
   }
 
   core.notice(`Publishing ${version.version} with ${files.length} files...`)
+  cors.notice(JSON.stringify(data))
+  const data = getFormData(version, files)
   const response = await fetch(
     `${apiUrl}/v1/projects/${project}/channels/${channel}/versions/api`,
     {
       method: 'POST',
       headers: {
-        'X-Api-Key': apiKey
+        'X-Api-Key': apiKey,
+        'Content-Type': `multipart/mixed; boundary=${data._boundary}`
       },
-      body: getFormData(version, files)
+      body: data
     }
   )
 
